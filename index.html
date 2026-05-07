@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI 客服</title>
+  <style>
+    /* ── 极简样式，核心逻辑清晰可见 ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; display: flex;
+           justify-content: center; align-items: center; height: 100vh; }
+
+    .chat-box { width: 420px; background: #fff; border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,.1); display: flex;
+                flex-direction: column; height: 600px; overflow: hidden; }
+
+    .chat-header { background: #1677ff; color: #fff; padding: 16px 20px;
+                   font-size: 16px; font-weight: bold; }
+
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px;
+                     display: flex; flex-direction: column; gap: 10px; }
+
+    /* 消息气泡 */
+    .msg { max-width: 80%; padding: 10px 14px; border-radius: 18px;
+           line-height: 1.5; font-size: 14px; word-break: break-word; }
+    .msg.user  { background: #1677ff; color: #fff; align-self: flex-end;
+                 border-bottom-right-radius: 4px; }
+    .msg.ai    { background: #f0f2f5; color: #222; align-self: flex-start;
+                 border-bottom-left-radius: 4px; }
+    .msg.error { background: #fff1f0; color: #cf1322; align-self: flex-start; }
+
+    /* 输入区 */
+    .chat-input { display: flex; padding: 12px; border-top: 1px solid #eee; gap: 8px; }
+    .chat-input input  { flex: 1; padding: 10px 14px; border: 1px solid #d9d9d9;
+                         border-radius: 20px; outline: none; font-size: 14px; }
+    .chat-input button { padding: 10px 20px; background: #1677ff; color: #fff;
+                         border: none; border-radius: 20px; cursor: pointer;
+                         font-size: 14px; transition: opacity .2s; }
+    .chat-input button:disabled { opacity: .5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<div class="chat-box">
+  <div class="chat-header">🤖 AI 智能客服</div>
+
+  <div class="chat-messages" id="messages">
+    <div class="msg ai">你好！我是 AI 客服，有什么可以帮您的？</div>
+  </div>
+
+  <div class="chat-input">
+    <input id="inputBox" type="text" placeholder="输入您的问题…" />
+    <button id="sendBtn" onclick="sendMessage()">发送</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// 核心：前端如何与后端 AI 通信
+// 只需一个 fetch POST 请求即可
+// ══════════════════════════════════════════════
+
+const API_URL = "http://localhost:5000/api/chat"; // 后端地址
+
+async function sendMessage() {
+  const input   = document.getElementById("inputBox");
+  const sendBtn = document.getElementById("sendBtn");
+  const text    = input.value.trim();
+  if (!text) return;
+
+  // 1. 显示用户消息
+  appendMsg(text, "user");
+  input.value = "";
+  sendBtn.disabled = true;
+
+  // 2. 显示"等待中"占位
+  const thinkingEl = appendMsg("正在思考…", "ai");
+
+  try {
+    // 3. ★ 关键：POST 请求发送给 Flask 后端
+    const response = await fetch(API_URL, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ message: text }),  // 发送 JSON
+    });
+
+    const data = await response.json();           // 解析 JSON 响应
+
+    // 4. 显示 AI 回复
+    thinkingEl.textContent = data.reply || data.error;
+    if (data.error) thinkingEl.classList.add("error");
+
+  } catch (err) {
+    thinkingEl.textContent = "网络错误，请检查后端服务是否启动";
+    thinkingEl.classList.add("error");
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+// 将消息追加到聊天窗口，返回元素引用（方便后续更新内容）
+function appendMsg(text, role) {
+  const el = document.createElement("div");
+  el.className = `msg ${role}`;
+  el.textContent = text;
+  const box = document.getElementById("messages");
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;  // 自动滚到底部
+  return el;
+}
+
+// 回车键发送
+document.getElementById("inputBox")
+  .addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+</script>
+
+</body>
+</html>
