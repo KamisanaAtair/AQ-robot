@@ -7,7 +7,7 @@ from langchain.agents import create_agent                       # v1 Agent 创�
 from langgraph.checkpoint.memory import InMemorySaver           # 内存型会话保存
 
 os.environ["DASHSCOPE_API_KEY"]     = "YOUR_DASHSCOPE_API_KEY"   # 千问
-os.environ["BAIDU_API_KEY"]         = "bce-v3/ALTAK-5HQ1Q8UgLi7ZiDS3zEFcV/674fc13625b67fe8c45e6286af4b5d451eda82f5"       # 百度搜索 API Key
+os.environ["BAIDU_API_KEY"]         = "YOUR_BAIDU_KEY"       # 百度搜索 API Key
 
 llm = ChatTongyi(
     model="qwen-turbo",   # 可换 qwen-plus / qwen-max
