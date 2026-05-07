@@ -1,10 +1,32 @@
-# 依赖安装(在项目目录下运行)
+# 依赖安装
 # pip install -r requirements.txt
+# 或 uv add <package>
 
+# 核心框架
 langchain>=1.0.0
 langchain-community>=0.3.0
+langchain-huggingface>=0.1.0
+langchain-qdrant>=0.1.0
 langgraph>=0.2.0
-dashscope>=1.20.0          # 千问官方 SDK(langchain_community 依赖)
+
+# 向量数据库
+qdrant-client>=1.9.0
+
+# 向量模型（含 bge-base-zh-v1.5 所需依赖）
+sentence-transformers>=3.0.0
+
+# 混合检索
+rank-bm25>=0.2.2          # BM25 关键词检索
+jieba>=0.42.1             # 中文分词（BM25 依赖）
+
+# 文档加载
+pypdf>=4.0.0              # PDF 支持
+docx2txt>=0.8             # Word 文档支持
+
+# LLM
+dashscope>=1.20.0         # 千问官方 SDK
+
+# 服务层
 flask==3.0.3
 flask-cors==4.0.1
-requests>=2.31.0           # HTTP 请求库(用于百度搜索 API)
+requests>=2.31.0
